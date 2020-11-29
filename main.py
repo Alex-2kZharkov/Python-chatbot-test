@@ -3,7 +3,7 @@ import logging
 from config import API_TOKEN
 from config import mydb
 from aiogram import Bot, Dispatcher, executor, types
-from buttons import button_start
+from buttons import *
 
 
 logging.basicConfig(level=logging.INFO)
@@ -33,15 +33,21 @@ async def process_callback_button1(call: types.CallbackQuery):
     logging.info(f"call = {callback_data}")
 
     mycursor = mydb.cursor()
-    mycursor.execute("SELECT category FROM chatbot_test.categories;")
+    mycursor.execute("SELECT id, category FROM chatbot_test.categories;")
     myresult = mycursor.fetchall()
+    ids = []
     categories_str = "Выберите один из следующих тестов:"
     i = 1
     for x in myresult:
-        x = ''.join(x)
+        ids.append(x[0])
+        x = ''.join(x[1])
         categories_str += f"\n{i}. {x}"
-        i+=1
-    await call.message.answer(categories_str)
+        i += 1
+    setButtonsCount(len(ids))
+    set_categories_buttons_count(ids)
+    print(categories_buttons)
+    await call.message.answer(categories_str, reply_markup=categories_buttons)
+
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=False)
