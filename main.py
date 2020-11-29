@@ -27,7 +27,7 @@ async def send_welcome(message: types.CallbackQuery):
 
 
 @dp.callback_query_handler(text_contains='start')
-async def process_callback_button1(call: types.CallbackQuery):
+async def process_callback_start(call: types.CallbackQuery):
     await call.answer(cache_time=60)
     callback_data = call.data
     logging.info(f"call = {callback_data}")
@@ -45,13 +45,22 @@ async def process_callback_button1(call: types.CallbackQuery):
         i += 1
     setButtonsCount(len(ids))
     set_categories_buttons_count(ids)
-    print(categories_buttons)
     await call.message.answer(categories_str, reply_markup=categories_buttons)
+
+
+@dp.callback_query_handler(text_contains="btn")
+async def process_callback_test(call: types.CallbackQuery):
+    """"Ловим какой тест был выбран и
+    выводим описание"""
+    await call.answer(cache_time=60)
+    callback_data = call.data
+    logging.info(f"call = {callback_data}")
+    mycursor = mydb.cursor()
+    id = callback_data.replace("action:btn", "")
+    mycursor.execute(f"SELECT description FROM chatbot_test.categories WHERE id={id};")
+    myresult = ''.join(mycursor.fetchone())
+    await call.message.answer(myresult)
 
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=False)
-    
-# updates = requests.get(API_link + "/getUpdates?offset=-1").json()
-#
-# print(updates)

@@ -25,9 +25,6 @@ categories_buttons = InlineKeyboardMarkup()
 
 def set_categories_buttons_count(ids):
     i = 0
-    print("!!!!")
-    print(categories_buttons_count)
     for x in range(categories_buttons_count):
-        print(x)
-        categories_buttons.add(InlineKeyboardButton(text=f"Тест №{i+1}", callback_data=f"action:{ids[i]}"))
+        categories_buttons.add(InlineKeyboardButton(text=f"Тест №{i+1}", callback_data=f"action:btn{ids[i]}"))
         i += 1
