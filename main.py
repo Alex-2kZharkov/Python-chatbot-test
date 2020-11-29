@@ -21,7 +21,7 @@ async def send_welcome(message: types.CallbackQuery):
         "а также даст несколько советов о том, как привести дела в порядок. \nПомните, что оффлайн врача не заменит"
         " ни один онлайн бот, поэтому обязательно проконсультируйтесь с психологом или психотерапевтом.")
 
-    await message.answer_sticker("https://media0.giphy.com/media/5s4Jc4DqpjsJO/giphy.gif","", reply_markup=button_start)
+    await message.answer_sticker("https://i.pinimg.com/originals/2f/87/31/2f8731b100b9e121962f72fb712c9799.gif","", reply_markup=button_start)
 
 
 if __name__ == '__main__':
