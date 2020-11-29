@@ -28,3 +28,14 @@ def set_categories_buttons_count(ids):
     for x in range(categories_buttons_count):
         categories_buttons.add(InlineKeyboardButton(text=f"Тест №{i+1}", callback_data=f"action:btn{ids[i]}"))
         i += 1
+
+
+button_pick_options = InlineKeyboardMarkup(row_width=2)
+
+
+def set_button_pick_options():
+    button_start_test = InlineKeyboardButton(text="Перейти к тесту", callback_data="action:start_test")
+    button_cancel_test = InlineKeyboardButton(text="Отмена", callback_data="action:cancel_test")
+    button_pick_options.insert(button_cancel_test)
+    button_pick_options.insert(button_start_test)
+

@@ -59,7 +59,21 @@ async def process_callback_test(call: types.CallbackQuery):
     id = callback_data.replace("action:btn", "")
     mycursor.execute(f"SELECT description FROM chatbot_test.categories WHERE id={id};")
     myresult = ''.join(mycursor.fetchone())
-    await call.message.answer(myresult)
+    set_button_pick_options()
+    await call.message.answer(myresult, reply_markup=button_pick_options)
+    #show_qustion(id)
+
+
+async def show_qustion(category_id: int):
+    mycursor = mydb.cursor()
+    mycursor.execute(f"SELECT qustion FROM chatbot_test.questions WHERE category_id={id};")
+    myresult = mycursor.fetchall()
+    i = 1
+    qustions = []
+    for x in myresult:
+        x = ''.join(x)
+        qustions.append(f"\n{i}. {x}")
+        i += 1
 
 
 if __name__ == '__main__':
