@@ -8,7 +8,7 @@ is_options_buttons_shown = False
 categories_buttons = InlineKeyboardMarkup()
 button_pick_options = InlineKeyboardMarkup(row_width=2)
 answers_buttons = ReplyKeyboardMarkup()
-
+start_again_button = ReplyKeyboardMarkup()
 
 def setButtonsCount(number: int):
     global categories_buttons_count, current_buttons_number
@@ -43,7 +43,7 @@ def set_button_pick_options():
     if not is_options_buttons_shown:
 
         button_start_test = InlineKeyboardButton(text="Перейти к тесту 👉", callback_data="action:go_test")
-        button_cancel_test = InlineKeyboardButton(text="Вернуться к выбору теста 👈", callback_data="action:change_test")
+        button_cancel_test = InlineKeyboardButton(text="Поменять тест 👈", callback_data="action:change_test")
 
         button_pick_options.insert(button_cancel_test)
         button_pick_options.insert(button_start_test)

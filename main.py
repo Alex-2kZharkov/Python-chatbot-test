@@ -14,6 +14,7 @@ dp = Dispatcher(bot)
 g_id = None
 user_answers = {}
 questions = []
+gifs = []
 currrent_question = 0
 
 
@@ -97,14 +98,17 @@ async def process_callback_start_test(call: types.CallbackQuery):
     for x in myresult:
         x = ''.join(x)
         answers_arr.append(x)
+
     set_reply_keyboard(answers_arr)
     init_user_answers(answers_arr)
     await get_questions(g_id)
+
     await call.message.answer(show_question(), reply_markup=answers_buttons)
+    await call.message.answer_sticker(gifs[currrent_question], "")
 
 
 def show_question():
-    return f"{currrent_question + 1} из {len(questions)}. {questions[currrent_question]}"
+    return f"{currrent_question + 1} из {len(questions)}.\n{questions[currrent_question]}"
 
 
 @dp.message_handler()
@@ -116,6 +120,7 @@ async def process_answer(msg: types.Message):
             currrent_question += 1
             print(user_answers)
             await msg.answer(show_question())
+            await msg.answer_sticker(gifs[currrent_question], "")
         else:
             await msg.answer("Конец теста!", reply_markup=ReplyKeyboardRemove())
             # вывести результаты
@@ -123,23 +128,23 @@ async def process_answer(msg: types.Message):
         await msg.answer("Вы не выбрали один из предложенных ответов!")
 
 
-@dp.callback_query_handler(text_contains="change_test")
-async def process_callback_change_test(call: types.CallbackQuery):
-
-    await call.answer(cache_time=60)
-    callback_data = call.data
-    logging.info(f"call = {callback_data}")
-    await call.message.answer("вы поменяли тест")
-
-
 async def get_questions(category_id: int):
+    global questions, gifs
     mycursor = mydb.cursor()
-    mycursor.execute(f"SELECT qustion FROM chatbot_test.questions WHERE category_id={category_id};")
+    mycursor.execute(f"SELECT qustion, gif_address FROM chatbot_test.questions WHERE category_id={category_id};")
     myresult = mycursor.fetchall()
-    global questions
+
     for x in myresult:
         x = ''.join(x)
+        gif_start = x.find("http") # в одной строке и вопрос и адрес, поэтому ищу начало адреса картинки
+        gif_address = x[gif_start:] # срез адреса
+        x = x[:gif_start] # срез от начала вопроса до адреса картинки
+
         questions.append(x)
+        gifs.append(gif_address)
+
+    print(questions)
+    print(gifs)
 
 
 if __name__ == '__main__':
