@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
 
@@ -7,6 +7,8 @@ current_buttons_number = 0
 is_options_buttons_shown = False
 categories_buttons = InlineKeyboardMarkup()
 button_pick_options = InlineKeyboardMarkup(row_width=2)
+answers_buttons = ReplyKeyboardMarkup()
+
 
 def setButtonsCount(number: int):
     global categories_buttons_count, current_buttons_number
@@ -22,8 +24,6 @@ button_start = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Начать тест⚡️", callback_data="action:start")]
     ]
 )
-
-
 
 
 def set_categories_buttons_count(ids):
@@ -42,7 +42,7 @@ def set_button_pick_options():
 
     if not is_options_buttons_shown:
 
-        button_start_test = InlineKeyboardButton(text="Перейти к тесту 👉", callback_data="action:start_test")
+        button_start_test = InlineKeyboardButton(text="Перейти к тесту 👉", callback_data="action:go_test")
         button_cancel_test = InlineKeyboardButton(text="Вернуться к выбору теста 👈", callback_data="action:change_test")
 
         button_pick_options.insert(button_cancel_test)
@@ -50,4 +50,7 @@ def set_button_pick_options():
         is_options_buttons_shown = True
 
 
-
+def set_reply_keyboard(answers_arr):
+    for a in answers_arr:
+        button = KeyboardButton(a)
+        answers_buttons.add(button)
