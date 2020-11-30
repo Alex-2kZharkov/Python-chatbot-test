@@ -98,7 +98,7 @@ async def process_callback_start_test(call: types.CallbackQuery):
     callback_data = call.data
     logging.info(f"call = {callback_data}")
     mycursor = mydb.cursor()
-    mycursor.execute(f"SELECT answer FROM chatbot_test.answers WHERE answer_category_id={g_id};")
+    mycursor.execute(f"SELECT answer, emoji FROM chatbot_test.answers WHERE answer_category_id={g_id};")
     myresult = mycursor.fetchall()
     answers_arr = []
     for x in myresult:
@@ -119,12 +119,15 @@ def show_question():
 
 @dp.message_handler()
 async def process_answer(msg: types.Message):
+    print('!!!!!!!!!!!!!!!!')
+    print(msg)
     global categories_buttons_count, current_buttons_number, is_options_buttons_shown, categories_buttons
     global button_pick_options, answers_buttons, start_again_button
     if msg.text in user_answers.keys():
         global current_question
         if current_question < len(questions)-1:
             user_answers[msg.text] += 1
+            print(user_answers)
             current_question += 1
             await msg.answer(show_question())
             await msg.answer_sticker(gifs[current_question], "")
