@@ -15,19 +15,25 @@ g_id = None
 user_answers = {}
 questions = []
 gifs = []
-currrent_question = 0
+current_question = 0
+
+def reinit_used_variables():
+    global g_id, user_answers, questions, gifs, current_question
+    g_id = None
+    user_answers = {}
+    questions = []
+    gifs = []
+    current_question = 0
 
 
 @dp.message_handler(commands=['start', 'help'])
+@dp.message_handler(text="Пройти другие тесты 🤩")
 async def send_welcome(message: types.CallbackQuery):
-    """
-    This handler will be called when user sends `/start` or `/help` command
-    """
-    print(message)
+
     await message.answer(
         "Добро пожаловать в MeChecker.\nMeChecker поможет Вам определить уровень тревоги, наличие депрессии, "
         "а также даст несколько советов о том, как привести дела в порядок. \nПомните, что оффлайн врача не заменит"
-        " ни один онлайн бот, поэтому обязательно проконсультируйтесь с психологом или психотерапевтом.")
+        " ни один онлайн бот, поэтому обязательно проконсультируйтесь с психологом или психотерапевтом.", reply_markup=ReplyKeyboardRemove())
 
     await message.answer_sticker("https://i.pinimg.com/originals/2f/87/31/2f8731b100b9e121962f72fb712c9799.gif", "",
                                  reply_markup=button_start)
@@ -36,7 +42,7 @@ async def send_welcome(message: types.CallbackQuery):
 @dp.callback_query_handler(text_contains='start')
 @dp.callback_query_handler(text_contains='change_test')
 async def process_callback_start(call: types.CallbackQuery):
-    await call.answer(cache_time=60)
+    await call.answer(cache_time=500)
     callback_data = call.data
     logging.info(f"call = {callback_data}")
 
@@ -71,7 +77,7 @@ def init_user_answers(answers):
 async def process_callback_test(call: types.CallbackQuery):
     """"Ловим какой тест был выбран и
     выводим описание"""
-    await call.answer(cache_time=60)
+    await call.answer(cache_time=500)
     callback_data = call.data
     logging.info(f"call = {callback_data}")
     mycursor = mydb.cursor()
@@ -87,7 +93,7 @@ async def process_callback_test(call: types.CallbackQuery):
 """///////////////////////////////////////////////////////////////////////"""
 @dp.callback_query_handler(text_contains="go_test")
 async def process_callback_start_test(call: types.CallbackQuery):
-    await call.answer(cache_time=60)
+    await call.answer(cache_time=500)
     await call.message.edit_reply_markup(reply_markup='')
     callback_data = call.data
     logging.info(f"call = {callback_data}")
@@ -104,26 +110,31 @@ async def process_callback_start_test(call: types.CallbackQuery):
     await get_questions(g_id)
 
     await call.message.answer(show_question(), reply_markup=answers_buttons)
-    await call.message.answer_sticker(gifs[currrent_question], "")
+    await call.message.answer_sticker(gifs[current_question], "")
 
 
 def show_question():
-    return f"{currrent_question + 1} из {len(questions)}.\n{questions[currrent_question]}"
+    return f"{current_question + 1} из {len(questions)}.\n{questions[current_question]}"
 
 
 @dp.message_handler()
 async def process_answer(msg: types.Message):
+    global categories_buttons_count, current_buttons_number, is_options_buttons_shown, categories_buttons
+    global button_pick_options, answers_buttons, start_again_button
     if msg.text in user_answers.keys():
-        global currrent_question
-        if currrent_question < len(questions)-1:
+        global current_question
+        if current_question < len(questions)-1:
             user_answers[msg.text] += 1
-            currrent_question += 1
-            print(user_answers)
+            current_question += 1
             await msg.answer(show_question())
-            await msg.answer_sticker(gifs[currrent_question], "")
+            await msg.answer_sticker(gifs[current_question], "")
         else:
-            await msg.answer("Конец теста!", reply_markup=ReplyKeyboardRemove())
+            reinit_used_variables()
+
+            await msg.answer("Конец теста!", reply_markup=start_again_button)
             # вывести результаты
+            # забить все писпользованные переменные
+
     else:
         await msg.answer("Вы не выбрали один из предложенных ответов!")
 
@@ -142,9 +153,6 @@ async def get_questions(category_id: int):
 
         questions.append(x)
         gifs.append(gif_address)
-
-    print(questions)
-    print(gifs)
 
 
 if __name__ == '__main__':

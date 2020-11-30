@@ -1,14 +1,18 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
+global categories_buttons_count, current_buttons_number, is_options_buttons_shown, categories_buttons
+global button_pick_options, answers_buttons, start_again_button
 
 categories_buttons_count = 0
 current_buttons_number = 0
 is_options_buttons_shown = False
+is_answers_buttons_shown = False
 categories_buttons = InlineKeyboardMarkup()
 button_pick_options = InlineKeyboardMarkup(row_width=2)
 answers_buttons = ReplyKeyboardMarkup()
-start_again_button = ReplyKeyboardMarkup()
+start_again_button = ReplyKeyboardMarkup().add(KeyboardButton("Пройти другие тесты 🤩"))
+
 
 def setButtonsCount(number: int):
     global categories_buttons_count, current_buttons_number
@@ -51,6 +55,10 @@ def set_button_pick_options():
 
 
 def set_reply_keyboard(answers_arr):
-    for a in answers_arr:
-        button = KeyboardButton(a)
-        answers_buttons.add(button)
+    global is_answers_buttons_shown
+
+    if not is_answers_buttons_shown:
+        for a in answers_arr:
+            button = KeyboardButton(a)
+            answers_buttons.add(button)
+            is_answers_buttons_shown = True
