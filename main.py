@@ -18,9 +18,10 @@ gifs = []
 current_question = 0
 global_reply_keyboard = None
 total_grade = None
+grade_information = None
 
 def reinit_used_variables():
-    global g_id, user_answers, questions, gifs, current_question, global_reply_keyboard, total_grade
+    global g_id, user_answers, questions, gifs, current_question, global_reply_keyboard, total_grade, grade_information
     g_id = None
     user_answers = {}
     questions = []
@@ -28,6 +29,7 @@ def reinit_used_variables():
     current_question = 0
     global_reply_keyboard = None
     total_grade = None
+    grade_information = None
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -127,7 +129,7 @@ def show_question():
 async def process_answer(msg: types.Message):
 
     global categories_buttons_count, current_buttons_number, is_options_buttons_shown, categories_buttons
-    global button_pick_options, answers_buttons, start_again_button, total_grade
+    global button_pick_options, answers_buttons, start_again_button, total_grade, grade_information
 
     if msg.text in user_answers.keys():
         global current_question
@@ -143,8 +145,13 @@ async def process_answer(msg: types.Message):
 
 
             total_grade = count_answers_grade(g_id, user_answers)
+            grade_information = define_recomendation(g_id, total_grade)
+            str = f"Вы набрали {total_grade} из {grade_information['grade_limit']} баллов. Помните, что чем ниже количество набранных баллов" \
+                  f", тем меньше уровень того или инного растройства\n" \
+                  f"Таким образом, y Вас {grade_information['recommendation']}"
+            await msg.answer(str, reply_markup=start_again_button)
+            await msg.answer_sticker(grade_information["gif"], "")
 
-            await msg.answer("Конец теста!", reply_markup=start_again_button)
             # вывести результаты
 
     else:

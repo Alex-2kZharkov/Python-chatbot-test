@@ -29,5 +29,20 @@ def count_answers_grade(category_id, answers_obj):
     return total_grade
 
 
+def define_recomendation(category_id, total_grade):
+
+    mycursor = mydb.cursor()
+    mycursor.execute(f"select categories_n_grades.id, categories_n_grades.recomendation_text, grades_scope.grade, categories_n_grades.gif from categories_n_grades  INNER JOIN grades_scope ON categories_n_grades.grades_id=grades_scope.id where categories_n_grades.categories_grades_id={category_id};")
+    myresult = mycursor.fetchall()
+
+    for item in myresult:
+        if total_grade <= item[2]:
+            return {
+                "recom_id": item[0],
+                "recommendation": item[1],
+                "grade_limit": item[2],
+                "gif": item[3]
+            }
+
 
 
