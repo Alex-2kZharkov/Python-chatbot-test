@@ -16,14 +16,16 @@ user_answers = {}
 questions = []
 gifs = []
 current_question = 0
+global_reply_keyboard = None
 
 def reinit_used_variables():
-    global g_id, user_answers, questions, gifs, current_question
+    global g_id, user_answers, questions, gifs, current_question, global_reply_keyboard
     g_id = None
     user_answers = {}
     questions = []
     gifs = []
     current_question = 0
+    global_reply_keyboard = None
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -32,7 +34,7 @@ async def send_welcome(message: types.CallbackQuery):
 
     await message.answer(
         "Добро пожаловать в MeChecker.\nMeChecker поможет Вам определить уровень тревоги, наличие депрессии, "
-        "а также даст несколько советов о том, как привести дела в порядок. \nПомните, что оффлайн врача не заменит"
+        "а также даст несколько советов о том, как привести дела в порядок. Помните, что оффлайн врача не заменит"
         " ни один онлайн бот, поэтому обязательно проконсультируйтесь с психологом или психотерапевтом.", reply_markup=ReplyKeyboardRemove())
 
     await message.answer_sticker("https://i.pinimg.com/originals/2f/87/31/2f8731b100b9e121962f72fb712c9799.gif", "",
@@ -93,6 +95,8 @@ async def process_callback_test(call: types.CallbackQuery):
 """///////////////////////////////////////////////////////////////////////"""
 @dp.callback_query_handler(text_contains="go_test")
 async def process_callback_start_test(call: types.CallbackQuery):
+    global global_reply_keyboard
+
     await call.answer(cache_time=500)
     await call.message.edit_reply_markup(reply_markup='')
     callback_data = call.data
@@ -105,11 +109,11 @@ async def process_callback_start_test(call: types.CallbackQuery):
         x = ''.join(x)
         answers_arr.append(x)
 
-    set_reply_keyboard(answers_arr)
+    global_reply_keyboard = set_reply_keyboard(answers_arr)
     init_user_answers(answers_arr)
     await get_questions(g_id)
 
-    await call.message.answer(show_question(), reply_markup=answers_buttons)
+    await call.message.answer(show_question(), reply_markup=global_reply_keyboard)
     await call.message.answer_sticker(gifs[current_question], "")
 
 

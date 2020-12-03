@@ -10,7 +10,7 @@ is_options_buttons_shown = False
 is_answers_buttons_shown = False
 categories_buttons = InlineKeyboardMarkup()
 button_pick_options = InlineKeyboardMarkup(row_width=2)
-answers_buttons = ReplyKeyboardMarkup()
+
 start_again_button = ReplyKeyboardMarkup().add(KeyboardButton("Пройти другие тесты 🤩"))
 
 
@@ -55,10 +55,9 @@ def set_button_pick_options():
 
 
 def set_reply_keyboard(answers_arr):
-    global is_answers_buttons_shown
+    answers_buttons = ReplyKeyboardMarkup()
+    for a in answers_arr:
+        button = KeyboardButton(a)
+        answers_buttons.add(button)
 
-    if not is_answers_buttons_shown:
-        for a in answers_arr:
-            button = KeyboardButton(a)
-            answers_buttons.add(button)
-            is_answers_buttons_shown = True
+    return answers_buttons
