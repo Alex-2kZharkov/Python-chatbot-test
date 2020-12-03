@@ -4,7 +4,7 @@ from config import API_TOKEN
 from config import mydb
 from aiogram import Bot, Dispatcher, executor, types
 from buttons import *
-
+from results import *
 
 logging.basicConfig(level=logging.INFO)
 
@@ -17,21 +17,23 @@ questions = []
 gifs = []
 current_question = 0
 global_reply_keyboard = None
+total_grade = None
 
 def reinit_used_variables():
-    global g_id, user_answers, questions, gifs, current_question, global_reply_keyboard
+    global g_id, user_answers, questions, gifs, current_question, global_reply_keyboard, total_grade
     g_id = None
     user_answers = {}
     questions = []
     gifs = []
     current_question = 0
     global_reply_keyboard = None
+    total_grade = None
 
 
 @dp.message_handler(commands=['start', 'help'])
 @dp.message_handler(text="Пройти другие тесты 🤩")
 async def send_welcome(message: types.CallbackQuery):
-
+    reinit_used_variables()
     await message.answer(
         "Добро пожаловать в MeChecker.\nMeChecker поможет Вам определить уровень тревоги, наличие депрессии, "
         "а также даст несколько советов о том, как привести дела в порядок. Помните, что оффлайн врача не заменит"
@@ -123,24 +125,27 @@ def show_question():
 
 @dp.message_handler()
 async def process_answer(msg: types.Message):
-    print('!!!!!!!!!!!!!!!!')
-    print(msg)
+
     global categories_buttons_count, current_buttons_number, is_options_buttons_shown, categories_buttons
-    global button_pick_options, answers_buttons, start_again_button
+    global button_pick_options, answers_buttons, start_again_button, total_grade
+
     if msg.text in user_answers.keys():
         global current_question
+
+        user_answers[msg.text] += 1
+        print(user_answers)
+
         if current_question < len(questions)-1:
-            user_answers[msg.text] += 1
-            print(user_answers)
             current_question += 1
             await msg.answer(show_question())
             await msg.answer_sticker(gifs[current_question], "")
         else:
-            reinit_used_variables()
+
+
+            total_grade = count_answers_grade(g_id, user_answers)
 
             await msg.answer("Конец теста!", reply_markup=start_again_button)
             # вывести результаты
-            # забить все писпользованные переменные
 
     else:
         await msg.answer("Вы не выбрали один из предложенных ответов!")
