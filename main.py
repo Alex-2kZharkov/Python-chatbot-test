@@ -5,6 +5,7 @@ from config import mydb
 from aiogram import Bot, Dispatcher, executor, types
 from buttons import *
 from results import *
+from datetime import date
 
 logging.basicConfig(level=logging.INFO)
 
@@ -135,7 +136,6 @@ async def process_answer(msg: types.Message):
         global current_question
 
         user_answers[msg.text] += 1
-        print(user_answers)
 
         if current_question < len(questions)-1:
             current_question += 1
@@ -143,13 +143,14 @@ async def process_answer(msg: types.Message):
             await msg.answer_sticker(gifs[current_question], "")
         else:
 
-
             total_grade = count_answers_grade(g_id, user_answers)
             grade_information = define_recomendation(g_id, total_grade)
-            str = f"Вы набрали {total_grade} из {grade_information['grade_limit']} баллов. Помните, что чем ниже количество набранных баллов" \
-                  f", тем меньше уровень того или инного растройства\n" \
+            save_user_results(int(msg["from"]["id"]), int(grade_information["recom_id"]), int(total_grade))
+
+            string = f"Помните, что чем ниже количество набранных баллов" \
+                  f", тем меньше уровень того или инного растройства.\nВы набрали {total_grade} из {grade_information['grade_limit']} баллов. \n" \
                   f"Таким образом, y Вас {grade_information['recommendation']}"
-            await msg.answer(str, reply_markup=start_again_button)
+            await msg.answer(string, reply_markup=start_again_button)
             await msg.answer_sticker(grade_information["gif"], "")
 
             # вывести результаты

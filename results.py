@@ -23,7 +23,6 @@ def count_answers_grade(category_id, answers_obj):
     total_grade = 0
 
     for i in range(len(answers)):
-        print(f"\n{answers_obj[answers[i]]}")
         total_grade += answers_obj[answers[i]] * grades[i] # количество ответов конкретного типа * бал за один такой ответ
 
     return total_grade
@@ -44,5 +43,8 @@ def define_recomendation(category_id, total_grade):
                 "gif": item[3]
             }
 
-
+def save_user_results(id_telegram, recom_id, result):
+    mycursor = mydb.cursor()
+    mycursor.execute(f"INSERT INTO chatbot_test.users (idTelegram, user_cat_grades_id, result, date) VALUES({id_telegram}, {recom_id}, {result}, curdate())")
+    mydb.commit()
 
