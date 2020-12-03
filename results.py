@@ -62,8 +62,20 @@ def save_user_results(id_telegram, recom_id, result):
 def draw_pie_chart(current_grade, grade_limit, category_title):
 
     y = np.array([grade_limit - current_grade, current_grade])
-    mylabels = [f"Все баллы: {grade_limit}", f"Набранный\nбалл: {current_grade}"]
-    myexplode = [0, 0.15]
-    plt.pie(y, labels=mylabels, startangle = 90, explode = myexplode, shadow = True)
-    plt.legend(title=category_title, loc='upper left', bbox_to_anchor=(-0.15, 0.65, 0.5, 0.5))
+    mylabels = [f"Все баллы: {grade_limit}", f"Набранный балл: {current_grade}"]
+
+    plt.pie(y, labels=mylabels, startangle = 90,colors=["#0E49B5", "#54E346"])
+    plt.legend(title=category_title, loc='upper left', bbox_to_anchor=(-0.15, 0.67, 0.5, 0.5))
     plt.savefig('single_test_result.png')
+
+
+def draw_line_graph(all_grades, all_dates, category_title):
+    Year = [30, 40, 60, 20]
+    Unemployment_Rate = ['01-12-2020', '02-12-2020', '12-12-2020', '31-12-2020']
+
+    plt.plot(Unemployment_Rate, Year, color='#0E49B5', marker='o')
+    plt.title('Зависимость результатов теста от даты', fontsize=18)
+    plt.xlabel('Дата', fontsize=16)
+    plt.ylabel('Результат теста', fontsize=16)
+    plt.grid(True)
+    plt.show()

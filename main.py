@@ -150,10 +150,8 @@ async def process_answer(msg: types.Message):
             mycursor = mydb.cursor()
             mycursor.execute(f"SELECT category FROM chatbot_test.categories where id={g_id}")
             myresult = mycursor.fetchone()
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print(myresult)
 
-            draw_pie_chart(total_grade, grade_information['grade_limit'] , 'Шкала Либовица для оценки симптомов социофобии(Страх)')
+            draw_pie_chart(total_grade, grade_information['grade_limit'] , ''.join(myresult))
 
 
             string = f"Помните, что чем ниже количество набранных баллов" \
@@ -161,12 +159,14 @@ async def process_answer(msg: types.Message):
                   f"Таким образом, y Вас {grade_information['recommendation']}"
             await msg.answer(string, reply_markup=start_again_button)
             await msg.answer_sticker(grade_information["gif"], "")
-            await msg.answer_photo(caption='Графическая интерпретация результатов теста:', photo=Image.open("/Users/alex/Desktop/python_chatbot/single_test_result.png"))
+            #await msg.answer_photo(caption='Графическая интерпретация результатов теста:', photo=Image.open("/Users/alex/Desktop/python_chatbot/single_test_result.png"))
 
             # вывести результаты
 
     else:
         await msg.answer("Я Вас не понимаю!")
+
+def get_all_result_by_category(g_id):
 
 
 async def get_questions(category_id: int):
