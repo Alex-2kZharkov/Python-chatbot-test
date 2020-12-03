@@ -5,7 +5,7 @@ from config import mydb
 from aiogram import Bot, Dispatcher, executor, types
 from buttons import *
 from results import *
-from datetime import date
+from PIL import Image
 
 logging.basicConfig(level=logging.INFO)
 
@@ -147,16 +147,26 @@ async def process_answer(msg: types.Message):
             grade_information = define_recomendation(g_id, total_grade)
             save_user_results(int(msg["from"]["id"]), int(grade_information["recom_id"]), int(total_grade))
 
+            mycursor = mydb.cursor()
+            mycursor.execute(f"SELECT category FROM chatbot_test.categories where id={g_id}")
+            myresult = mycursor.fetchone()
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print(myresult)
+
+            draw_pie_chart(total_grade, grade_information['grade_limit'] , 'Шкала Либовица для оценки симптомов социофобии(Страх)')
+
+
             string = f"Помните, что чем ниже количество набранных баллов" \
                   f", тем меньше уровень того или инного растройства.\nВы набрали {total_grade} из {grade_information['grade_limit']} баллов. \n" \
                   f"Таким образом, y Вас {grade_information['recommendation']}"
             await msg.answer(string, reply_markup=start_again_button)
             await msg.answer_sticker(grade_information["gif"], "")
+            await msg.answer_photo(caption='Графическая интерпретация результатов теста:', photo=Image.open("/Users/alex/Desktop/python_chatbot/single_test_result.png"))
 
             # вывести результаты
 
     else:
-        await msg.answer("Вы не выбрали один из предложенных ответов!")
+        await msg.answer("Я Вас не понимаю!")
 
 
 async def get_questions(category_id: int):

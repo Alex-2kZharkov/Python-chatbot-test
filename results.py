@@ -1,4 +1,6 @@
 from config import mydb
+import matplotlib.pyplot as plt
+import numpy as np
 
 def get_answers_grades(category_id):
     answers = []
@@ -56,3 +58,12 @@ def save_user_results(id_telegram, recom_id, result):
     mycursor.execute(f"INSERT INTO chatbot_test.users (idTelegram, user_cat_grades_id, result, date) VALUES({id_telegram}, {recom_id}, {result}, curdate())")
     mydb.commit()
 
+
+def draw_pie_chart(current_grade, grade_limit, category_title):
+
+    y = np.array([grade_limit - current_grade, current_grade])
+    mylabels = [f"Все баллы: {grade_limit}", f"Набранный\nбалл: {current_grade}"]
+    myexplode = [0, 0.15]
+    plt.pie(y, labels=mylabels, startangle = 90, explode = myexplode, shadow = True)
+    plt.legend(title=category_title, loc='upper left', bbox_to_anchor=(-0.15, 0.65, 0.5, 0.5))
+    plt.savefig('single_test_result.png')
