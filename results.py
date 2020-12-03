@@ -33,15 +33,23 @@ def define_recomendation(category_id, total_grade):
     mycursor = mydb.cursor()
     mycursor.execute(f"select categories_n_grades.id, categories_n_grades.recomendation_text, grades_scope.grade, categories_n_grades.gif from categories_n_grades  INNER JOIN grades_scope ON categories_n_grades.grades_id=grades_scope.id where categories_n_grades.categories_grades_id={category_id};")
     myresult = mycursor.fetchall()
+    grade_limit = 0
+    flag = True
+    obj = None
 
     for item in myresult:
-        if total_grade <= item[2]:
-            return {
+        if grade_limit < int(item[2]):
+            grade_limit = int(item[2])
+
+        if flag and total_grade <= item[2]:
+            flag = False
+            obj = {
                 "recom_id": item[0],
                 "recommendation": item[1],
-                "grade_limit": item[2],
                 "gif": item[3]
             }
+    obj["grade_limit"] = grade_limit
+    return obj
 
 def save_user_results(id_telegram, recom_id, result):
     mycursor = mydb.cursor()

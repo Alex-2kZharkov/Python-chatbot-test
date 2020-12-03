@@ -11,7 +11,7 @@ is_answers_buttons_shown = False
 categories_buttons = InlineKeyboardMarkup()
 button_pick_options = InlineKeyboardMarkup(row_width=2)
 
-start_again_button = ReplyKeyboardMarkup().add(KeyboardButton("Пройти другие тесты 🤩"))
+start_again_button = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton("Пройти другие тесты 🤩"))
 
 
 def setButtonsCount(number: int):
