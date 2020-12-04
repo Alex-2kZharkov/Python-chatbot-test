@@ -6,6 +6,7 @@ from aiogram import Bot, Dispatcher, executor, types
 from buttons import *
 from results import *
 from PIL import Image
+import requests
 
 logging.basicConfig(level=logging.INFO)
 
@@ -145,29 +146,36 @@ async def process_answer(msg: types.Message):
 
             total_grade = count_answers_grade(g_id, user_answers)
             grade_information = define_recomendation(g_id, total_grade)
-            #save_user_results(int(msg["from"]["id"]), int(grade_information["recom_id"]), int(total_grade))
+            save_user_results(int(msg["from"]["id"]), int(grade_information["recom_id"]), int(total_grade))
 
-            mycursor = mydb.cursor()
-            mycursor.execute(f"SELECT category FROM chatbot_test.categories where id={g_id}")
-            category_title = mycursor.fetchone()
-            category_title = ''.join(category_title)
+            category_title = get_category_title(g_id)
+
             draw_pie_chart(total_grade, grade_information['grade_limit'] , category_title)
 
             obj = get_all_result_by_category(int(msg["from"]["id"]), g_id)
-
             draw_line_graph(obj["results"], obj["dates"], category_title)
 
             string = f"Помните, что чем ниже количество набранных баллов" \
                   f", тем меньше уровень того или инного растройства.\nВы набрали {total_grade} из {grade_information['grade_limit']} баллов. \n" \
                   f"Таким образом, y Вас {grade_information['recommendation']}"
+
             await msg.answer(string, reply_markup=start_again_button)
             await msg.answer_sticker(grade_information["gif"], "")
-            #await msg.answer_photo(caption='Графическая интерпретация результатов теста:', photo=Image.open("/Users/alex/Desktop/python_chatbot/single_test_result.png"))
 
-            # вывести результаты
+            with open('single_test_result.png', 'rb') as photo:
+                await msg.answer_photo(photo, caption="Графическая интерпретация результатов текущего теста")
+
+            res_string = "Графическая интерпретация всех результатов выбаннного теста"
+
+            if len(obj["results"]) < 2:
+                res_string += "(в данный момент тест пройден один раз, поэтому на графике показана только начальная точка)"
+
+            with open('line_graph.png', 'rb') as photo:
+                await msg.answer_photo(photo, caption=res_string)
+
 
     else:
-        await msg.answer("Я Вас не понимаю!")
+        await msg.answer("Я Вас не понимаю🙄")
 
 
 def get_all_result_by_category(id_telegram, g_id):
@@ -189,7 +197,7 @@ def get_all_result_by_category(id_telegram, g_id):
         "dates": dates
     }
 
-async def get_questions(category_id: int):
+def get_questions(category_id: int):
     global questions, gifs
     mycursor = mydb.cursor()
     mycursor.execute(f"SELECT qustion, gif_address FROM chatbot_test.questions WHERE category_id={category_id};")
@@ -203,6 +211,12 @@ async def get_questions(category_id: int):
 
         questions.append(x)
         gifs.append(gif_address)
+
+def get_category_title(id):
+    mycursor = mydb.cursor()
+    mycursor.execute(f"SELECT category FROM chatbot_test.categories where id={g_id}")
+    category_title = mycursor.fetchone()
+    return ''.join(category_title)
 
 
 if __name__ == '__main__':
