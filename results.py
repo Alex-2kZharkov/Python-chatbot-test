@@ -67,15 +67,27 @@ def draw_pie_chart(current_grade, grade_limit, category_title):
     plt.pie(y, labels=mylabels, startangle = 90,colors=["#0E49B5", "#54E346"])
     plt.legend(title=category_title, loc='upper left', bbox_to_anchor=(-0.15, 0.67, 0.5, 0.5))
     plt.savefig('single_test_result.png')
+    plt.close()
 
 
 def draw_line_graph(all_grades, all_dates, category_title):
-    Year = [30, 40, 60, 20]
-    Unemployment_Rate = ['01-12-2020', '02-12-2020', '12-12-2020', '31-12-2020']
 
-    plt.plot(Unemployment_Rate, Year, color='#0E49B5', marker='o')
-    plt.title('Зависимость результатов теста от даты', fontsize=18)
-    plt.xlabel('Дата', fontsize=16)
-    plt.ylabel('Результат теста', fontsize=16)
+    counter = 0
+    for i in range(len(category_title)):
+
+        if category_title[i] == " ":
+            counter += 1
+
+        if counter == 4:
+            category_title = category_title[0: i] + "\n" + category_title[i: ]
+            break
+
+    print(category_title)
+
+    plt.plot(all_dates, all_grades, color='#b088f9', marker='o')
+    plt.title(f"{category_title}", fontsize=16)
+    plt.xlabel('Дата', fontsize=14)
+    plt.ylabel('Результат теста', fontsize=14)
     plt.grid(True)
-    plt.show()
+    plt.savefig('line_graph.png')
+    plt.close()

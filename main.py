@@ -149,10 +149,13 @@ async def process_answer(msg: types.Message):
 
             mycursor = mydb.cursor()
             mycursor.execute(f"SELECT category FROM chatbot_test.categories where id={g_id}")
-            myresult = mycursor.fetchone()
+            category_title = mycursor.fetchone()
+            category_title = ''.join(category_title)
+            draw_pie_chart(total_grade, grade_information['grade_limit'] , category_title)
 
-            draw_pie_chart(total_grade, grade_information['grade_limit'] , ''.join(myresult))
+            obj = get_all_result_by_category(int(msg["from"]["id"]), g_id)
 
+            draw_line_graph(obj["results"], obj["dates"], category_title)
 
             string = f"Помните, что чем ниже количество набранных баллов" \
                   f", тем меньше уровень того или инного растройства.\nВы набрали {total_grade} из {grade_information['grade_limit']} баллов. \n" \
@@ -166,8 +169,25 @@ async def process_answer(msg: types.Message):
     else:
         await msg.answer("Я Вас не понимаю!")
 
-def get_all_result_by_category(g_id):
 
+def get_all_result_by_category(id_telegram, g_id):
+    dates = []
+    results = []
+
+    mycursor = mydb.cursor()
+    mycursor.execute(f"select users.result, users.date from users "
+                     f"INNER JOIN categories_n_grades ON users.user_cat_grades_id = categories_n_grades.id "
+                     f"where categories_n_grades.categories_grades_id = {g_id} and users.idTelegram = {id_telegram}")
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
+        results.append(x[0])
+        dates.append(x[1].strftime("%d-%m-%Y"))
+
+    return {
+        "results": results,
+        "dates": dates
+    }
 
 async def get_questions(category_id: int):
     global questions, gifs
