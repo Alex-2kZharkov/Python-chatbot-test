@@ -145,7 +145,7 @@ async def process_answer(msg: types.Message):
 
             total_grade = count_answers_grade(g_id, user_answers)
             grade_information = define_recomendation(g_id, total_grade)
-            save_user_results(int(msg["from"]["id"]), int(grade_information["recom_id"]), int(total_grade))
+            #save_user_results(int(msg["from"]["id"]), int(grade_information["recom_id"]), int(total_grade))
 
             mycursor = mydb.cursor()
             mycursor.execute(f"SELECT category FROM chatbot_test.categories where id={g_id}")
@@ -177,7 +177,7 @@ def get_all_result_by_category(id_telegram, g_id):
     mycursor = mydb.cursor()
     mycursor.execute(f"select users.result, users.date from users "
                      f"INNER JOIN categories_n_grades ON users.user_cat_grades_id = categories_n_grades.id "
-                     f"where categories_n_grades.categories_grades_id = {g_id} and users.idTelegram = {id_telegram}")
+                     f"where categories_n_grades.categories_grades_id = {g_id} and users.idTelegram = {id_telegram} ORDER  BY  users.date")
     myresult = mycursor.fetchall()
 
     for x in myresult:

@@ -1,5 +1,6 @@
 from config import mydb
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import numpy as np
 
 def get_answers_grades(category_id):
@@ -72,22 +73,12 @@ def draw_pie_chart(current_grade, grade_limit, category_title):
 
 def draw_line_graph(all_grades, all_dates, category_title):
 
-    counter = 0
-    for i in range(len(category_title)):
-
-        if category_title[i] == " ":
-            counter += 1
-
-        if counter == 4:
-            category_title = category_title[0: i] + "\n" + category_title[i: ]
-            break
-
-    print(category_title)
-
-    plt.plot(all_dates, all_grades, color='#b088f9', marker='o')
-    plt.title(f"{category_title}", fontsize=16)
-    plt.xlabel('Дата', fontsize=14)
-    plt.ylabel('Результат теста', fontsize=14)
+    plt.figure(figsize=(15, 13))
+    plt.plot(all_dates, all_grades, color='#52057b', marker='o', linewidth=3)
+    plt.xticks(all_dates, rotation=40, ha='right')
+    plt.title(f"{category_title}", fontsize=24)
+    plt.xlabel('Дата', fontsize=16)
+    plt.ylabel('Результат теста', fontsize=16)
     plt.grid(True)
     plt.savefig('line_graph.png')
     plt.close()
