@@ -5,7 +5,7 @@ from config import mydb
 from aiogram import Bot, Dispatcher, executor, types
 from buttons import *
 from results import *
-from PIL import Image
+
 
 logging.basicConfig(level=logging.INFO)
 
