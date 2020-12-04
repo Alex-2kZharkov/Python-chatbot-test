@@ -55,10 +55,14 @@ def define_recomendation(category_id, total_grade):
     return obj
 
 def save_user_results(id_telegram, recom_id, result):
-    mycursor = mydb.cursor()
-    mycursor.execute(f"INSERT INTO chatbot_test.users (idTelegram, user_cat_grades_id, result, date) VALUES({id_telegram}, {recom_id}, {result}, curdate())")
-    mydb.commit()
 
+    try:
+        mycursor = mydb.cursor()
+        mycursor.callproc('save_user_procedure', [id_telegram, recom_id, result])
+        mydb.commit()
+
+    except mydb.connector.Error as error:
+        print("Failed to execute stored procedure: {}".format(error))
 
 def draw_pie_chart(current_grade, grade_limit, category_title):
 
