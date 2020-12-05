@@ -224,12 +224,14 @@ def get_data_for_complex_chart(id_telegram):
 
     colors = recalculate_colors(colors) #пересчитывает цифры rgb по пропорции и получает массив кортежей-tuple
 
+    calculate_sub_colors(category_titles_counts, colors)
+    #draw_complex_pie_chart(category_titles_array, category_titles_counts, grade_titles, grades, colors, total_times)
+
 
 def recalculate_colors(colors):
     for i in range(len(colors)):
         a_list = colors[i].split(",")
         colors[i] = list(map(int, a_list))
-
 
     for i in range(len(colors)):
         temp_array = []
@@ -238,6 +240,7 @@ def recalculate_colors(colors):
         colors[i] = tuple(temp_array)
 
     return colors
+
 
 def get_all_result_by_category(id_telegram, g_id):
     dates = []

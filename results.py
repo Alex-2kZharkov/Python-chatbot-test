@@ -88,17 +88,13 @@ def draw_line_graph(all_grades, all_dates, category_title):
     plt.close()
 
 
-def draw_groupped_chart(category_titles, category_titles_count, grade_titles, grades, colors):
+def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_size, colors, total_times):
     # Make data: I have 3 groups and 7 subgroups
-    group_names = ['groupA', 'groupB', 'groupC']
-    group_size = [12, 11, 30]
-    subgroup_names = ['A1', 'A2', 'A.3', 'B.1', 'B.2', 'C.1', 'C.2', 'C.3',
-                      'C.4', 'C.5']
-    subgroup_names2 = ['Слабовыраженная социофобия: 12', ' выраженная социофобия', 'Умеренный депрессивный эпизод: 13',
-                      'социофобия отсутствует', 'социофобия отсутствует', 'социофобия отсутствует',
-                      'социофобия отсутствует',
-                      'социофобия отсутствует', 'социофобия отсутствует', 'социофобия отсутствует']
-    subgroup_size = [4, 3, 5, 6, 5, 10, 5, 5, 4, 6]
+
+    subgroup_names = []
+    for i in range(len(subgroup_names2)):
+        subgroup_names.append("")
+
 
     a, b, c = [plt.cm.Blues, plt.cm.Reds, plt.cm.Greens]
 
@@ -106,8 +102,7 @@ def draw_groupped_chart(category_titles, category_titles_count, grade_titles, gr
     fig, ax = plt.subplots()
 
     ax.axis('equal')
-    mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.05, colors=
-    [(0.07, 0.0, 0.47, 0.8), (0.61, 0.0, 0.57, 0.5), (0.99, 0.23, 0.41, 0.)])
+    mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.05, colors=colors)
 
     plt.setp(mypie, width=0.3, edgecolor='white')
 
@@ -122,10 +117,27 @@ def draw_groupped_chart(category_titles, category_titles_count, grade_titles, gr
     plt.legend(loc=(0.75, 0.8))
     handles, labels = ax.get_legend_handles_labels()
     plt.subplots_adjust(left=-0.35)
-    ax.legend(handles[3:], subgroup_names2, loc=(0.78, 0.72),title="Пройдено тестов: 12",title_fontsize=15, prop={"size": 12})
+    ax.legend(handles[3:], subgroup_names2, loc=(0.78, 0.72),title=f"Пройдено тестов: {total_times}",title_fontsize=15, prop={"size": 12})
 
     fig = plt.gcf()
     fig.set_size_inches(16, 9)
 
     plt.show()
     plt.savefig('complex_pi_chart.png', dpi=150)
+
+
+def calculate_sub_colors(group_size, colors): #создается масссив кортежей с цветами подкругов
+    sub_colors = []
+
+    for i in range(len(colors)):
+
+        average_opacity = round(float(1 / (group_size[i] + 1)), 2)
+        current_opacity = average_opacity
+
+        for j in range(group_size[i]):
+            if j < group_size[i]:
+                sub_colors.append(colors[i] + (round(1 - current_opacity, 2),))
+                current_opacity += average_opacity
+
+    return sub_colors
+
