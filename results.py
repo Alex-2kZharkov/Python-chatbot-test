@@ -106,8 +106,9 @@ def draw_groupped_chart(all_grades, all_categories):
     fig, ax = plt.subplots()
 
     ax.axis('equal')
-    mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.02, colors=
-    [a(0.6), b(0.6), c(0.6)])
+    mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.05, colors=
+    [(0.07, 0.0, 0.47, 0.8), (0.61, 0.0, 0.57, 0.5), (0.99, 0.23, 0.41, 0.)])
+
     plt.setp(mypie, width=0.3, edgecolor='white')
 
     # Second Ring (Inside)
@@ -121,7 +122,7 @@ def draw_groupped_chart(all_grades, all_categories):
     plt.legend(loc=(0.75, 0.8))
     handles, labels = ax.get_legend_handles_labels()
     plt.subplots_adjust(left=-0.35)
-    ax.legend(handles[3:], subgroup_names2, loc=(0.78, 0.75),title="Пройдено тестов: 12",title_fontsize=15, prop={"size": 10})
+    ax.legend(handles[3:], subgroup_names2, loc=(0.78, 0.72),title="Пройдено тестов: 12",title_fontsize=15, prop={"size": 12})
 
     fig = plt.gcf()
     fig.set_size_inches(16, 9)

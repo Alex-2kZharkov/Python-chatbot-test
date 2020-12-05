@@ -117,7 +117,7 @@ async def process_callback_start_test(call: types.CallbackQuery):
 
     global_reply_keyboard = set_reply_keyboard(answers_arr)
     init_user_answers(answers_arr)
-    await get_questions(g_id)
+    get_questions(g_id)
 
     await call.message.answer(show_question(), reply_markup=global_reply_keyboard)
     await call.message.answer_sticker(gifs[current_question], "")
@@ -173,9 +173,65 @@ async def process_answer(msg: types.Message):
             with open('line_graph.png', 'rb') as photo:
                 await msg.answer_photo(photo, caption=res_string)
 
+            with open('complex_pi_chart.png', 'rb') as photo:
+                await msg.answer_photo(photo, caption=res_string)
+
 
     else:
         await msg.answer("Я Вас не понимаю🙄")
+
+
+def get_data_for_complex_chart(id_telegram):
+    mycursor = mydb.cursor()
+    mycursor.execute(f"select categories.category, grades_scope.grade_title, COUNT(grades_scope.grade_title) as count, categories.rgb from users "
+        f"INNER JOIN categories_n_grades ON users.user_cat_grades_id = categories_n_grades.id "
+        f"INNER JOIN categories ON categories_n_grades.categories_grades_id = categories.id "
+        f"INNER JOIN grades_scope ON categories_n_grades.grades_id = grades_scope.id "
+        f"where users.idTelegram = '706466022' "
+        f"GROUP BY categories.category, grades_scope.grade_title, categories.rgb  ORDER BY categories.category;")
+
+    myresult = mycursor.fetchall()
+    total_times = 0
+    category_titles_array = []
+    category_titles_counts = []
+    category_titles_obj = []
+    grade_titles = []
+    grades = []
+    colors = []
+
+    for row in myresult: #разделяет данные
+        category_titles_obj.append(row[0])
+        grade_titles.append(row[1])
+        grades.append(row[2])
+        total_times += int(row[2])
+        colors.append(row[3])
+
+    category_titles_obj = dict.fromkeys(category_titles_obj)
+    colors = list(dict.fromkeys(colors))
+
+    for property in category_titles_obj: #считает количество прохождений для каждой категории
+        for row in myresult:
+            if property == row[0]:
+                if category_titles_obj[property] is None:
+                    category_titles_obj[property] = 0 + row[2]
+                else:
+                    category_titles_obj[property] += row[2]
+
+    for property in category_titles_obj: #разделили на массив категорий и массив количества каждой из них
+        category_titles_array.append(property)
+        category_titles_counts.append(category_titles_obj[property])
+
+    print("\n")
+    print(category_titles_array)
+    print(category_titles_counts)
+    print(grade_titles)
+    print(grades)
+    print(colors)
+    print(total_times)
+
+
+
+
 
 
 def get_all_result_by_category(id_telegram, g_id):
