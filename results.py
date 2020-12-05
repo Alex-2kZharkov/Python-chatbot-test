@@ -86,3 +86,45 @@ def draw_line_graph(all_grades, all_dates, category_title):
     plt.grid(True)
     plt.savefig('line_graph.png')
     plt.close()
+
+
+def draw_groupped_chart(all_grades, all_categories):
+    # Make data: I have 3 groups and 7 subgroups
+    group_names = ['groupA', 'groupB', 'groupC']
+    group_size = [12, 11, 30]
+    subgroup_names = ['A1', 'A2', 'A.3', 'B.1', 'B.2', 'C.1', 'C.2', 'C.3',
+                      'C.4', 'C.5']
+    subgroup_names2 = ['Слабовыраженная социофобия: 12', ' выраженная социофобия', 'Умеренный депрессивный эпизод: 13',
+                      'социофобия отсутствует', 'социофобия отсутствует', 'социофобия отсутствует',
+                      'социофобия отсутствует',
+                      'социофобия отсутствует', 'социофобия отсутствует', 'социофобия отсутствует']
+    subgroup_size = [4, 3, 5, 6, 5, 10, 5, 5, 4, 6]
+
+    a, b, c = [plt.cm.Blues, plt.cm.Reds, plt.cm.Greens]
+
+    # First Ring (outside)
+    fig, ax = plt.subplots()
+
+    ax.axis('equal')
+    mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.02, colors=
+    [a(0.6), b(0.6), c(0.6)])
+    plt.setp(mypie, width=0.3, edgecolor='white')
+
+    # Second Ring (Inside)
+    mypie2, _ = ax.pie(subgroup_size, radius=1.3 - 0.3,
+                       labels=subgroup_names, labeldistance=0.7, colors=[a(0.5), a(0.4),
+                                                                         a(0.3), b(0.5), b(0.4), c(0.6), c(0.5), c(0.4),
+                                                                         c(0.3), c(0.2)])
+    plt.setp(mypie2, width=0.45, edgecolor='white')
+
+
+    plt.legend(loc=(0.75, 0.8))
+    handles, labels = ax.get_legend_handles_labels()
+    plt.subplots_adjust(left=-0.35)
+    ax.legend(handles[3:], subgroup_names2, loc=(0.78, 0.75),title="Пройдено тестов: 12",title_fontsize=15, prop={"size": 10})
+
+    fig = plt.gcf()
+    fig.set_size_inches(16, 9)
+
+    plt.show()
+    plt.savefig('complex_pi_chart.png', dpi=150)
