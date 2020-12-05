@@ -88,7 +88,7 @@ def draw_line_graph(all_grades, all_dates, category_title):
     plt.close()
 
 
-def draw_groupped_chart(all_grades, all_categories):
+def draw_groupped_chart(category_titles, category_titles_count, grade_titles, grades, colors):
     # Make data: I have 3 groups and 7 subgroups
     group_names = ['groupA', 'groupB', 'groupC']
     group_size = [12, 11, 30]

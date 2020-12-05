@@ -221,18 +221,23 @@ def get_data_for_complex_chart(id_telegram):
         category_titles_array.append(property)
         category_titles_counts.append(category_titles_obj[property])
 
-    print("\n")
-    print(category_titles_array)
-    print(category_titles_counts)
-    print(grade_titles)
-    print(grades)
-    print(colors)
-    print(total_times)
+
+    colors = recalculate_colors(colors) #пересчитывает цифры rgb по пропорции и получает массив кортежей-tuple
 
 
+def recalculate_colors(colors):
+    for i in range(len(colors)):
+        a_list = colors[i].split(",")
+        colors[i] = list(map(int, a_list))
 
 
+    for i in range(len(colors)):
+        temp_array = []
+        for item in colors[i]:
+            temp_array.append(round(float(item / 255), 2))
+        colors[i] = tuple(temp_array)
 
+    return colors
 
 def get_all_result_by_category(id_telegram, g_id):
     dates = []
