@@ -195,6 +195,7 @@ def get_data_for_complex_chart(id_telegram):
     category_titles_array = []
     category_titles_counts = []
     category_titles_obj = []
+    sub_category_numbers = []
     grade_titles = []
     grades = []
     colors = []
@@ -209,6 +210,13 @@ def get_data_for_complex_chart(id_telegram):
     category_titles_obj = dict.fromkeys(category_titles_obj)
     colors = list(dict.fromkeys(colors))
 
+    for property in category_titles_obj:
+        count = 0
+        for row in myresult:
+            if property == row[0]:
+                count +=1
+        sub_category_numbers.append(count)
+
     for property in category_titles_obj: #считает количество прохождений для каждой категории
         for row in myresult:
             if property == row[0]:
@@ -222,10 +230,10 @@ def get_data_for_complex_chart(id_telegram):
         category_titles_counts.append(category_titles_obj[property])
 
 
+
     colors = recalculate_colors(colors) #пересчитывает цифры rgb по пропорции и получает массив кортежей-tuple
 
-    calculate_sub_colors(category_titles_counts, colors)
-    #draw_complex_pie_chart(category_titles_array, category_titles_counts, grade_titles, grades, colors, total_times)
+    draw_complex_pie_chart(category_titles_array, category_titles_counts, grade_titles, grades, colors, sub_category_numbers, total_times)
 
 
 def recalculate_colors(colors):

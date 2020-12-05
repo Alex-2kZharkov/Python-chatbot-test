@@ -88,42 +88,64 @@ def draw_line_graph(all_grades, all_dates, category_title):
     plt.close()
 
 
-def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_size, colors, total_times):
+def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_size, colors, sub_category_numbers,  total_times):
     # Make data: I have 3 groups and 7 subgroups
 
     subgroup_names = []
     for i in range(len(subgroup_names2)):
-        subgroup_names.append("")
+        subgroup_names.append(" ")
+
+    sub_colors = calculate_sub_colors(sub_category_numbers, colors)
+    group_names = break_category_titles(group_names)
+
+    print(group_names)
+    print(subgroup_names2)
+
+    for i in range(len(group_names)): #добавить количество тестов
+        group_names[i] = group_names[i][0: ] + f": {group_size[i]}"
 
 
-    a, b, c = [plt.cm.Blues, plt.cm.Reds, plt.cm.Greens]
+    for i in range(len(subgroup_names2)):
+        subgroup_names2[i] = subgroup_names2[i][0: ] + f": {subgroup_size[i]}"
 
     # First Ring (outside)
     fig, ax = plt.subplots()
-
     ax.axis('equal')
-    mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.05, colors=colors)
 
+    mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.03, colors=colors)
     plt.setp(mypie, width=0.3, edgecolor='white')
 
     # Second Ring (Inside)
-    mypie2, _ = ax.pie(subgroup_size, radius=1.3 - 0.3,
-                       labels=subgroup_names, labeldistance=0.7, colors=[a(0.5), a(0.4),
-                                                                         a(0.3), b(0.5), b(0.4), c(0.6), c(0.5), c(0.4),
-                                                                         c(0.3), c(0.2)])
+    mypie2, _ = ax.pie(subgroup_size, radius=1.3 - 0.3, labels=subgroup_names, labeldistance=0.7, colors=sub_colors)
     plt.setp(mypie2, width=0.45, edgecolor='white')
 
 
     plt.legend(loc=(0.75, 0.8))
     handles, labels = ax.get_legend_handles_labels()
-    plt.subplots_adjust(left=-0.35)
-    ax.legend(handles[3:], subgroup_names2, loc=(0.78, 0.72),title=f"Пройдено тестов: {total_times}",title_fontsize=15, prop={"size": 12})
+    plt.subplots_adjust(left=-0.10)
+    ax.legend(handles[3:], subgroup_names2, loc=(0.87, 0.78),title=f"Пройдено тестов: {total_times}",title_fontsize=15, prop={"size": 12})
 
     fig = plt.gcf()
-    fig.set_size_inches(16, 9)
+    fig.set_size_inches(17, 9)
 
     plt.show()
     plt.savefig('complex_pi_chart.png', dpi=150)
+
+
+def break_category_titles(category_titles): #разбивает категорию на две строки, если она длиннее 4 слов
+
+    for i in range(len(category_titles)):
+        counter = 0
+        for j in range(len(category_titles[i])):
+
+            if category_titles[i][j] == " ":
+                counter += 1
+
+            if counter == 4:
+                category_titles[i] = category_titles[i][0: j] + "\n" + category_titles[i][j:]
+                break
+
+    return category_titles
 
 
 def calculate_sub_colors(group_size, colors): #создается масссив кортежей с цветами подкругов
