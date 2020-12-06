@@ -149,8 +149,9 @@ async def process_answer(msg: types.Message):
             save_user_results(int(msg["from"]["id"]), int(grade_information["recom_id"]), int(total_grade))
 
             category_title = get_category_title(g_id)
+            subcategories = get_subcategories(g_id)
 
-            draw_pie_chart(total_grade, grade_information['grade_limit'] , category_title)
+            draw_pie_chart(total_grade, grade_information['grade_limit'] , subcategories["titles"], subcategories["grades"], category_title)
 
             obj = get_all_result_by_category(int(msg["from"]["id"]), g_id)
             draw_line_graph(obj["results"], obj["dates"], category_title)

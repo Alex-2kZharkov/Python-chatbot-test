@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 
+
 def get_answers_grades(category_id):
     answers = []
     grades = []
@@ -54,6 +55,7 @@ def define_recomendation(category_id, total_grade):
     obj["grade_limit"] = grade_limit
     return obj
 
+
 def save_user_results(id_telegram, recom_id, result):
 
     try:
@@ -64,15 +66,80 @@ def save_user_results(id_telegram, recom_id, result):
     except mydb.connector.Error as error:
         print("Failed to execute stored procedure: {}".format(error))
 
-def draw_pie_chart(current_grade, grade_limit, category_title):
+def get_subcategories(category_id): # для простой круговой диаграммы нужны подкатегории и их оценки
+    mycursor = mydb.cursor()
+    mycursor.execute(f"select grades_scope.grade_title, grades_scope.grade from categories_n_grades "
+        f"INNER JOIN grades_scope ON categories_n_grades.grades_id = grades_scope.id "
+        f"where categories_n_grades.categories_grades_id ={category_id};")
+    myresult = mycursor.fetchall()
+    titles = []
+    grades = []
 
-    y = np.array([grade_limit - current_grade, current_grade])
-    mylabels = [f"Все баллы: {grade_limit}", f"Набранный балл: {current_grade}"]
+    for item in myresult:
+        titles.append(item[0])
+        grades.append(item[1])
 
-    plt.pie(y, labels=mylabels, startangle = 90,colors=["#0E49B5", "#54E346"])
-    plt.legend(title=category_title, loc='upper left', bbox_to_anchor=(-0.15, 0.67, 0.5, 0.5))
-    plt.savefig('single_test_result.png')
-    plt.close()
+    return {
+        "titles": titles,
+        "grades": grades
+    }
+
+
+def reformat_grades(grades): #сделать строки с оценками типо 0-15, 15-30 и тд
+
+    result_array = []
+    str = None
+    for i in range(len(grades)):
+        if i == 0:
+            str = f"0 - {grades[i]}"
+        else:
+            str = f"{grades[i - 1]} - {grades[i]}"
+        result_array.append(str)
+
+
+def draw_pie_chart(grade_limit, current_grade, subgroup_names2, subgroup_size, category_title):
+
+    colors = [(1, 0.6, 0), (0, 0.59, 0.95)]
+    group_names = [f"Все баллы: {grade_limit}", f"Набранный балл: {current_grade}"]
+
+    subgroup_names = reformat_grades(subgroup_size)
+    sub_colors = []
+    legend_labels = []
+
+    average_opacity = round(float(1 / (len(subgroup_size) + 1)), 2)
+    current_opacity = average_opacity
+
+    for j in range(len(subgroup_size)):
+        sub_colors.append((1, 0.6, 0) + (round(1 - current_opacity, 2),))
+        current_opacity += average_opacity
+
+
+    for i in range(len(subgroup_names2)):
+        legend_labels[i] = f"{subgroup_names2[i]}: {subgroup_names[i]}"
+
+    # First Ring (outside)
+    fig, ax = plt.subplots()
+    ax.axis('equal')
+
+    mypie, _ = ax.pie([grade_limit, current_grade], radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.03,
+                      colors=colors)
+    plt.setp(mypie, width=0.3, edgecolor='white')
+
+    # Second Ring (Inside)
+    mypie2, _ = ax.pie(subgroup_size, radius=1.3 - 0.3, labels=subgroup_names, labeldistance=0.7, colors=sub_colors)
+    plt.setp(mypie2, width=0.45, edgecolor='white')
+
+    plt.legend(loc=(0.75, 0.8))
+    handles, labels = ax.get_legend_handles_labels()
+    plt.subplots_adjust(left=-0.10)
+    ax.legend(handles[3:], subgroup_names2, loc=(0.87, 0.78), title=category_title,
+              title_fontsize=15, prop={"size": 12})
+
+    fig = plt.gcf()
+    fig.set_size_inches(9, 9)
+
+    plt.show()
+    plt.savefig('single_test_result.png', dpi=150)
 
 
 def draw_line_graph(all_grades, all_dates, category_title):
@@ -98,8 +165,6 @@ def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_si
     sub_colors = calculate_sub_colors(sub_category_numbers, colors)
     group_names = break_category_titles(group_names)
 
-    print(group_names)
-    print(subgroup_names2)
 
     for i in range(len(group_names)): #добавить количество тестов
         group_names[i] = group_names[i][0: ] + f": {group_size[i]}"
