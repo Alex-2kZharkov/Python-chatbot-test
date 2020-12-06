@@ -1,12 +1,13 @@
-import json
+
 import logging
 from config import API_TOKEN
 from config import mydb
 from aiogram import Bot, Dispatcher, executor, types
 from buttons import *
 from results import *
-from PIL import Image
-import requests
+from config import SIMPLE_PIE_CHART
+from config import COMPLEX_PIE_CHART
+from pdf_results import *
 
 logging.basicConfig(level=logging.INFO)
 
@@ -98,7 +99,6 @@ async def process_callback_test(call: types.CallbackQuery):
     await call.message.edit_reply_markup(reply_markup='')
 
 
-"""///////////////////////////////////////////////////////////////////////"""
 @dp.callback_query_handler(text_contains="go_test")
 async def process_callback_start_test(call: types.CallbackQuery):
     global global_reply_keyboard
@@ -153,10 +153,11 @@ async def process_answer(msg: types.Message):
 
 
             draw_pie_chart(grade_information['grade_limit'] , total_grade, subcategories["titles"], subcategories["grades"], category_title)
-
-
             obj = get_all_result_by_category(int(msg["from"]["id"]), g_id)
             draw_line_graph(obj["results"], obj["dates"], category_title)
+
+            await msg.answer("Ваши ответы находятся в роцессе обработки. Пожалуйста, ожидайте.")
+
             get_data_for_complex_chart(int(msg["from"]["id"]))
 
             string = f"Помните, что чем ниже количество набранных баллов" \
@@ -166,7 +167,7 @@ async def process_answer(msg: types.Message):
             await msg.answer(string, reply_markup=start_again_button)
             await msg.answer_sticker(grade_information["gif"], "")
 
-            with open('single_test_result.png', 'rb') as photo:
+            with open(f'{SIMPLE_PIE_CHART}.png', 'rb') as photo:
                 await msg.answer_photo(photo, caption="Графическая интерпретация результатов текущего теста")
 
             res_string = "Графическая интерпретация всех результатов выбранного теста"
@@ -174,11 +175,14 @@ async def process_answer(msg: types.Message):
             if len(obj["results"]) < 2:
                 res_string += "(в данный момент тест пройден один раз, поэтому на графике показана только начальная точка)"
 
-            with open('line_graph.png', 'rb') as photo:
+            with open(f'{category_title}.png', 'rb') as photo:
                 await msg.answer_photo(photo, caption=res_string)
 
-            with open('complex_pi_chart.png', 'rb') as photo:
+            with open(f'{COMPLEX_PIE_CHART}.png', 'rb') as photo:
                 await msg.answer_photo(photo, caption="Графическая интерпретация общего количества тестов")
+
+            # формирование и отпрвка .pdf файла
+
 
 
     else:

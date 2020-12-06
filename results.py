@@ -1,8 +1,7 @@
 from config import mydb
+from config import SIMPLE_PIE_CHART
+from config import COMPLEX_PIE_CHART
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import numpy as np
-
 
 def get_answers_grades(category_id):
     answers = []
@@ -146,7 +145,7 @@ def draw_pie_chart(grade_limit, current_grade, subgroup_names2, subgroup_size, c
     fig.set_size_inches(15, 8)
 
     #plt.show()
-    plt.savefig('single_test_result.png', dpi=150)
+    plt.savefig(f"{SIMPLE_PIE_CHART}.png", dpi=150)
     plt.close()
 
 
@@ -168,7 +167,7 @@ def draw_line_graph(all_grades, all_dates, category_title):
     plt.ylabel("Результат теста", fontsize=20)
     plt.grid(True)
     plt.show()
-    plt.savefig("line_graph.png")
+    plt.savefig(f"{category_title}.png")
 
 
 def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_size, colors, sub_category_numbers,  total_times):
@@ -210,7 +209,7 @@ def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_si
     fig.set_size_inches(17, 9)
 
     #plt.show()
-    plt.savefig('complex_pi_chart.png', dpi=150)
+    plt.savefig(f"{COMPLEX_PIE_CHART}.png", dpi=150)
     plt.close()
 
 
