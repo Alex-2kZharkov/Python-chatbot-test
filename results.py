@@ -96,10 +96,12 @@ def reformat_grades(grades): #сделать строки с оценками т
             str = f"{grades[i - 1]} - {grades[i]}"
         result_array.append(str)
 
+    return result_array
 
 def draw_pie_chart(grade_limit, current_grade, subgroup_names2, subgroup_size, category_title):
 
-    colors = [(1, 0.6, 0), (0, 0.59, 0.95)]
+
+    colors = [(1, 0.71, 0), (0, 0.59, 0.95)] # синий и жедтый цвета
     group_names = [f"Все баллы: {grade_limit}", f"Набранный балл: {current_grade}"]
 
     subgroup_names = reformat_grades(subgroup_size)
@@ -109,34 +111,38 @@ def draw_pie_chart(grade_limit, current_grade, subgroup_names2, subgroup_size, c
     average_opacity = round(float(1 / (len(subgroup_size) + 1)), 2)
     current_opacity = average_opacity
 
-    for j in range(len(subgroup_size)):
-        sub_colors.append((1, 0.6, 0) + (round(1 - current_opacity, 2),))
+    for j in range(len(subgroup_size)): #оттенки цветов
+        sub_colors.insert(0 , (1, 0.6, 0) + (round(1 - current_opacity, 2),))
         current_opacity += average_opacity
 
+    for i in range(len(subgroup_names2)): #склеивает заголовок + баллы
+        legend_labels.append(f"{subgroup_names2[i]}: {subgroup_names[i]}")
 
-    for i in range(len(subgroup_names2)):
-        legend_labels[i] = f"{subgroup_names2[i]}: {subgroup_names[i]}"
+
+    for i in range(len(subgroup_size) - 1, 0, -1): #нужно минусовать предыдущий баллы, типо 60-30, 30-25 и тд
+        if i > 0:
+            subgroup_size[i] = subgroup_size[i] - subgroup_size[i - 1]
 
     # First Ring (outside)
     fig, ax = plt.subplots()
     ax.axis('equal')
 
-    mypie, _ = ax.pie([grade_limit, current_grade], radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.03,
-                      colors=colors)
-    plt.setp(mypie, width=0.3, edgecolor='white')
+    mypie, _ = ax.pie([grade_limit-current_grade, current_grade], radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.03,
+                      colors=colors, startangle=90)
+    plt.setp(mypie, width=0.35, edgecolor='white')
 
     # Second Ring (Inside)
-    mypie2, _ = ax.pie(subgroup_size, radius=1.3 - 0.3, labels=subgroup_names, labeldistance=0.7, colors=sub_colors)
+    mypie2, _ = ax.pie(subgroup_size, radius=1.3 - 0.35, labels=subgroup_names, labeldistance=0.7, textprops = dict(rotation_mode = 'anchor', va='center', ha='center'), colors=sub_colors, startangle=90, counterclock=False)
     plt.setp(mypie2, width=0.45, edgecolor='white')
 
     plt.legend(loc=(0.75, 0.8))
     handles, labels = ax.get_legend_handles_labels()
-    plt.subplots_adjust(left=-0.10)
-    ax.legend(handles[3:], subgroup_names2, loc=(0.87, 0.78), title=category_title,
-              title_fontsize=15, prop={"size": 12})
+    plt.subplots_adjust(left=-0.30)
+    ax.legend(handles[2:], legend_labels, loc=(0.72, 0.90), title=category_title,
+              title_fontsize=13, prop={"size": 12})
 
     fig = plt.gcf()
-    fig.set_size_inches(9, 9)
+    fig.set_size_inches(15, 8)
 
     plt.show()
     plt.savefig('single_test_result.png', dpi=150)

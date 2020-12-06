@@ -230,10 +230,7 @@ def get_data_for_complex_chart(id_telegram):
         category_titles_array.append(property)
         category_titles_counts.append(category_titles_obj[property])
 
-
-
     colors = recalculate_colors(colors) #пересчитывает цифры rgb по пропорции и получает массив кортежей-tuple
-
     draw_complex_pie_chart(category_titles_array, category_titles_counts, grade_titles, grades, colors, sub_category_numbers, total_times)
 
 
