@@ -7,7 +7,7 @@ from buttons import *
 from results import *
 from config import SIMPLE_PIE_CHART
 from config import COMPLEX_PIE_CHART
-from pdf_results import *
+from pdf_results import create_pdf
 
 logging.basicConfig(level=logging.INFO)
 
@@ -154,6 +154,7 @@ async def process_answer(msg: types.Message):
 
             draw_pie_chart(grade_information['grade_limit'] , total_grade, subcategories["titles"], subcategories["grades"], category_title)
             obj = get_all_result_by_category(int(msg["from"]["id"]), g_id)
+
             draw_line_graph(obj["results"], obj["dates"], category_title)
 
             await msg.answer("Ваши ответы находятся в роцессе обработки. Пожалуйста, ожидайте.")
@@ -182,6 +183,9 @@ async def process_answer(msg: types.Message):
                 await msg.answer_photo(photo, caption="Графическая интерпретация общего количества тестов")
 
             # формирование и отпрвка .pdf файла
+            file_name = create_pdf(int(msg["from"]["id"]), total_grade, grade_information['grade_limit'], grade_information['recommendation'])
+            with open(file_name, 'rb') as doc:
+                await msg.answer_document(document=doc, caption="Более подробные результаты представлены в данном файле")
 
 
 

@@ -166,8 +166,8 @@ def draw_line_graph(all_grades, all_dates, category_title):
     plt.xlabel("Дата", fontsize=20)
     plt.ylabel("Результат теста", fontsize=20)
     plt.grid(True)
-    plt.show()
     plt.savefig(f"{category_title}.png")
+    plt.close()
 
 
 def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_size, colors, sub_category_numbers,  total_times):
