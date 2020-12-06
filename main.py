@@ -146,15 +146,18 @@ async def process_answer(msg: types.Message):
 
             total_grade = count_answers_grade(g_id, user_answers)
             grade_information = define_recomendation(g_id, total_grade)
-            save_user_results(int(msg["from"]["id"]), int(grade_information["recom_id"]), int(total_grade))
+            save_user_results(int(msg["from"]["id"]), g_id, int(total_grade), int(grade_information["recom_id"]))
 
-            category_title = get_category_title(g_id)
             subcategories = get_subcategories(g_id)
+            category_title = get_category_title(g_id)
 
-            draw_pie_chart(total_grade, grade_information['grade_limit'] , subcategories["titles"], subcategories["grades"], category_title)
+
+            draw_pie_chart(grade_information['grade_limit'] , total_grade, subcategories["titles"], subcategories["grades"], category_title)
+
 
             obj = get_all_result_by_category(int(msg["from"]["id"]), g_id)
             draw_line_graph(obj["results"], obj["dates"], category_title)
+            get_data_for_complex_chart(int(msg["from"]["id"]))
 
             string = f"Помните, что чем ниже количество набранных баллов" \
                   f", тем меньше уровень того или инного растройства.\nВы набрали {total_grade} из {grade_information['grade_limit']} баллов. \n" \
@@ -166,7 +169,7 @@ async def process_answer(msg: types.Message):
             with open('single_test_result.png', 'rb') as photo:
                 await msg.answer_photo(photo, caption="Графическая интерпретация результатов текущего теста")
 
-            res_string = "Графическая интерпретация всех результатов выбаннного теста"
+            res_string = "Графическая интерпретация всех результатов выбранного теста"
 
             if len(obj["results"]) < 2:
                 res_string += "(в данный момент тест пройден один раз, поэтому на графике показана только начальная точка)"
@@ -175,7 +178,7 @@ async def process_answer(msg: types.Message):
                 await msg.answer_photo(photo, caption=res_string)
 
             with open('complex_pi_chart.png', 'rb') as photo:
-                await msg.answer_photo(photo, caption=res_string)
+                await msg.answer_photo(photo, caption="Графическая интерпретация общего количества тестов")
 
 
     else:

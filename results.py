@@ -56,11 +56,11 @@ def define_recomendation(category_id, total_grade):
     return obj
 
 
-def save_user_results(id_telegram, recom_id, result):
+def save_user_results(id_telegram, recom_id, result,  recom_id2):
 
     try:
         mycursor = mydb.cursor()
-        mycursor.callproc('save_user_procedure', [id_telegram, recom_id, result])
+        mycursor.callproc('save_user_procedure', [id_telegram, recom_id, result, recom_id2])
         mydb.commit()
 
     except mydb.connector.Error as error:
@@ -127,6 +127,7 @@ def draw_pie_chart(grade_limit, current_grade, subgroup_names2, subgroup_size, c
     fig, ax = plt.subplots()
     ax.axis('equal')
 
+    print([grade_limit-current_grade, current_grade])
     mypie, _ = ax.pie([grade_limit-current_grade, current_grade], radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.03,
                       colors=colors, startangle=90)
     plt.setp(mypie, width=0.35, edgecolor='white')
@@ -137,28 +138,37 @@ def draw_pie_chart(grade_limit, current_grade, subgroup_names2, subgroup_size, c
 
     plt.legend(loc=(0.75, 0.8))
     handles, labels = ax.get_legend_handles_labels()
-    plt.subplots_adjust(left=-0.30)
-    ax.legend(handles[2:], legend_labels, loc=(0.72, 0.90), title=category_title,
+    plt.subplots_adjust(left=-0.27)
+    ax.legend(handles[2:], legend_labels, loc=(0.76, 0.88), title=category_title,
               title_fontsize=13, prop={"size": 12})
 
     fig = plt.gcf()
     fig.set_size_inches(15, 8)
 
-    plt.show()
+    #plt.show()
     plt.savefig('single_test_result.png', dpi=150)
+    plt.close()
 
 
 def draw_line_graph(all_grades, all_dates, category_title):
 
     plt.figure(figsize=(15, 13))
-    plt.plot(all_dates, all_grades, color='#52057b', marker='o', linewidth=3)
-    plt.xticks(all_dates, rotation=40, ha='right')
+    plt.plot(all_dates, all_grades, color="#eb355e", marker="o",markersize=12, markerfacecolor="#781035", markeredgecolor="#781035", linewidth=6)
+
+    for x, y in zip(all_dates, all_grades):
+        plt.annotate(y,  # this is the text
+                     (x, y),  # this is the point to label
+                     textcoords="offset points",  # how to position the text
+                     xytext=(0, 10),  # distance from text to points (x,y)
+                     ha='left')  # horizontal alignment can be left, right or center
+
+    plt.xticks(all_dates, rotation=40, ha="right")
     plt.title(f"{category_title}", fontsize=24)
-    plt.xlabel('Дата', fontsize=20)
-    plt.ylabel('Результат теста', fontsize=20)
+    plt.xlabel("Дата", fontsize=20)
+    plt.ylabel("Результат теста", fontsize=20)
     plt.grid(True)
-    plt.savefig('line_graph.png')
-    plt.close()
+    plt.show()
+    plt.savefig("line_graph.png")
 
 
 def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_size, colors, sub_category_numbers,  total_times):
@@ -184,23 +194,24 @@ def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_si
     ax.axis('equal')
 
     mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.03, colors=colors)
-    plt.setp(mypie, width=0.3, edgecolor='white')
+    plt.setp(mypie, width=0.3)
 
     # Second Ring (Inside)
     mypie2, _ = ax.pie(subgroup_size, radius=1.3 - 0.3, labels=subgroup_names, labeldistance=0.7, colors=sub_colors)
-    plt.setp(mypie2, width=0.45, edgecolor='white')
+    plt.setp(mypie2, width=0.45)
 
 
     plt.legend(loc=(0.75, 0.8))
     handles, labels = ax.get_legend_handles_labels()
     plt.subplots_adjust(left=-0.10)
-    ax.legend(handles[3:], subgroup_names2, loc=(0.87, 0.78),title=f"Пройдено тестов: {total_times}",title_fontsize=15, prop={"size": 12})
+    ax.legend(handles[len(group_names):], subgroup_names2, loc=(0.87, 0.78),title=f"Пройдено тестов: {total_times}",title_fontsize=15, prop={"size": 12})
 
     fig = plt.gcf()
     fig.set_size_inches(17, 9)
 
-    plt.show()
+    #plt.show()
     plt.savefig('complex_pi_chart.png', dpi=150)
+    plt.close()
 
 
 def break_category_titles(category_titles): #разбивает категорию на две строки, если она длиннее 4 слов
