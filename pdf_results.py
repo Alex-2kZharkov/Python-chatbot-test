@@ -3,7 +3,7 @@ from config import mydb
 from datetime import datetime
 from config import SIMPLE_PIE_CHART
 from config import COMPLEX_PIE_CHART
-from main import get_all_result_by_category
+from results import get_all_result_by_category
 from results import draw_line_graph
 
 def create_pdf(id_telegram, total_grade, grade_limit, recomendation):
@@ -42,7 +42,7 @@ def create_pdf(id_telegram, total_grade, grade_limit, recomendation):
                                "каждому из них. Он позволит Вам оценить эмоциональное состояние, в котором Вы преимущественно находились"
                                "и находитесь прямо сейчас")
 
-    pdf.image(f"{COMPLEX_PIE_CHART}.png", x=5, y=55, w=200, h=100)
+    pdf.image(f"{COMPLEX_PIE_CHART}.png", x=5, y=65, w=200, h=100)
 
     mycursor = mydb.cursor()
     mycursor.execute(f"select categories.id, categories.category from users "
@@ -63,14 +63,19 @@ def create_pdf(id_telegram, total_grade, grade_limit, recomendation):
         obj = get_all_result_by_category(id_telegram, categories_object[property])
         draw_line_graph(obj["results"], obj["dates"], property)
 
+        res_string = f"Нижеприведенный график показывает зависимость всех результатов, полученных в ходе прохождения теста - '{property}', " \
+                     f"от времени прохождения теста.\nБлагодаря ему легко визуализируется " \
+                     f"динамика психологического состояния человека. Приглядитесь к нему внимательно, вспомните недавние события, " \
+                     f"и Вы поймете, что улучшило Ваше психологическое состояние, а что - нет. Придерживайтесь этой тактики, " \
+                     f"потому что именно она поможет Вам в долгосрочной перспективе!"
+
+        if len(obj["results"]) < 2:
+            res_string += "(в данный момент тест пройден один раз, поэтому на графике показана только начальная точка)"
+
         pdf.add_page()
         pdf.set_font("DejaVuSerif", "", 14)
-        pdf.multi_cell(180, 8,
-                       txt=f"Нижеприведенный график показывает зависимость всех результатов, полученных в ходе прохождения теста - '{property}', "
-                           f"от времени прохождения теста.\nБлагодаря ему легко визуализировать"
-                           f" динамику психологического состояния человека. Приглядитесь к нему внимательно, вспомните недавние события, "
-                           f"и Вы поймете, что улучшило Ваше психологическое состояние, а что - нет. Придерживайтесь этой тактики"
-                           f", потому что именно она поможет Вам в долгосрочной перспективе!")
+
+        pdf.multi_cell(180, 8, txt=res_string)
 
         pdf.image(f"{property}.png", x=5, y=100, w=200, h=150)
 

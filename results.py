@@ -3,6 +3,27 @@ from config import SIMPLE_PIE_CHART
 from config import COMPLEX_PIE_CHART
 import matplotlib.pyplot as plt
 
+
+def get_all_result_by_category(id_telegram, g_id):
+    dates = []
+    results = []
+
+    mycursor = mydb.cursor()
+    mycursor.execute(f"select users.result, users.date from users "
+                     f"INNER JOIN categories_n_grades ON users.user_cat_grades_id = categories_n_grades.id "
+                     f"where categories_n_grades.categories_grades_id = {g_id} and users.idTelegram = {id_telegram} ORDER  BY  users.date")
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
+        results.append(x[0])
+        dates.append(x[1].strftime("%d-%m-%Y"))
+
+    return {
+        "results": results,
+        "dates": dates
+    }
+
+
 def get_answers_grades(category_id):
     answers = []
     grades = []
@@ -192,7 +213,7 @@ def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_si
     fig, ax = plt.subplots()
     ax.axis('equal')
 
-    mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.03, colors=colors)
+    mypie, _ = ax.pie(group_size, radius=1.3, labels=group_names, textprops={'fontsize': 12}, labeldistance=1.04, colors=colors)
     plt.setp(mypie, width=0.3)
 
     # Second Ring (Inside)

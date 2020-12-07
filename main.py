@@ -259,25 +259,6 @@ def recalculate_colors(colors):
     return colors
 
 
-def get_all_result_by_category(id_telegram, g_id):
-    dates = []
-    results = []
-
-    mycursor = mydb.cursor()
-    mycursor.execute(f"select users.result, users.date from users "
-                     f"INNER JOIN categories_n_grades ON users.user_cat_grades_id = categories_n_grades.id "
-                     f"where categories_n_grades.categories_grades_id = {g_id} and users.idTelegram = {id_telegram} ORDER  BY  users.date")
-    myresult = mycursor.fetchall()
-
-    for x in myresult:
-        results.append(x[0])
-        dates.append(x[1].strftime("%d-%m-%Y"))
-
-    return {
-        "results": results,
-        "dates": dates
-    }
-
 def get_questions(category_id: int):
     global questions, gifs
     mycursor = mydb.cursor()
