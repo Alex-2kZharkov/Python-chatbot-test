@@ -55,7 +55,9 @@ def count_answers_grade(category_id, answers_obj):
 def define_recomendation(category_id, total_grade):
 
     mycursor = mydb.cursor()
-    mycursor.execute(f"select categories_n_grades.id, categories_n_grades.recomendation_text, grades_scope.grade, categories_n_grades.gif from categories_n_grades  INNER JOIN grades_scope ON categories_n_grades.grades_id=grades_scope.id where categories_n_grades.categories_grades_id={category_id};")
+    mycursor.execute(f"select categories_n_grades.id, categories_n_grades.recomendation_text, grades_scope.grade, "
+                     "categories_n_grades.gif from categories_n_grades  INNER JOIN grades_scope ON "
+                     f"categories_n_grades.grades_id=grades_scope.id where categories_n_grades.categories_grades_id={category_id};")
     myresult = mycursor.fetchall()
     grade_limit = 0
     flag = True
@@ -86,11 +88,12 @@ def save_user_results(id_telegram, recom_id, result,  recom_id2):
     except mydb.connector.Error as error:
         print("Failed to execute stored procedure: {}".format(error))
 
+
 def get_subcategories(category_id): # для простой круговой диаграммы нужны подкатегории и их оценки
     mycursor = mydb.cursor()
     mycursor.execute(f"select grades_scope.grade_title, grades_scope.grade from categories_n_grades "
-        f"INNER JOIN grades_scope ON categories_n_grades.grades_id = grades_scope.id "
-        f"where categories_n_grades.categories_grades_id ={category_id};")
+                     "INNER JOIN grades_scope ON categories_n_grades.grades_id = grades_scope.id "
+                     f"where categories_n_grades.categories_grades_id ={category_id};")
     myresult = mycursor.fetchall()
     titles = []
     grades = []
@@ -105,7 +108,7 @@ def get_subcategories(category_id): # для простой круговой д�
     }
 
 
-def reformat_grades(grades): #сделать строки с оценками типо 0-15, 15-30 и тд
+def reformat_grades(grades):  # сделать строки с оценками типо 0-15, 15-30 и тд
 
     result_array = []
     str = None
@@ -118,10 +121,10 @@ def reformat_grades(grades): #сделать строки с оценками т
 
     return result_array
 
-def draw_pie_chart(grade_limit, current_grade, subgroup_names2, subgroup_size, category_title):
 
+def draw_pie_chart(id_telegram, grade_limit, current_grade, subgroup_names2, subgroup_size, category_title):
 
-    colors = [(1, 0.71, 0), (0, 0.59, 0.95)] # синий и жедтый цвета
+    colors = [(1, 0.71, 0), (0, 0.59, 0.95)]  # синий и жедтый цвета
     group_names = [f"Все баллы: {grade_limit}", f"Набранный балл: {current_grade}"]
 
     subgroup_names = reformat_grades(subgroup_size)
@@ -131,15 +134,14 @@ def draw_pie_chart(grade_limit, current_grade, subgroup_names2, subgroup_size, c
     average_opacity = round(float(1 / (len(subgroup_size) + 1)), 2)
     current_opacity = average_opacity
 
-    for j in range(len(subgroup_size)): #оттенки цветов
+    for j in range(len(subgroup_size)):  # оттенки цветов
         sub_colors.insert(0 , (1, 0.6, 0) + (round(1 - current_opacity, 2),))
         current_opacity += average_opacity
 
-    for i in range(len(subgroup_names2)): #склеивает заголовок + баллы
+    for i in range(len(subgroup_names2)):  # склеивает заголовок + баллы
         legend_labels.append(f"{subgroup_names2[i]}: {subgroup_names[i]}")
 
-
-    for i in range(len(subgroup_size) - 1, 0, -1): #нужно минусовать предыдущий баллы, типо 60-30, 30-25 и тд
+    for i in range(len(subgroup_size) - 1, 0, -1):  # нужно минусовать предыдущий баллы, типо 60-30, 30-25 и тд
         if i > 0:
             subgroup_size[i] = subgroup_size[i] - subgroup_size[i - 1]
 
@@ -164,13 +166,12 @@ def draw_pie_chart(grade_limit, current_grade, subgroup_names2, subgroup_size, c
 
     fig = plt.gcf()
     fig.set_size_inches(15, 8)
-
-    #plt.show()
-    plt.savefig(f"{SIMPLE_PIE_CHART}.png", dpi=150)
+    # plt.show()
+    plt.savefig(f"{SIMPLE_PIE_CHART}_{id_telegram}.png", dpi=150)
     plt.close()
 
 
-def draw_line_graph(all_grades, all_dates, category_title):
+def draw_line_graph(id_telegram, all_grades, all_dates, category_title):
 
     plt.figure(figsize=(15, 13))
     plt.plot(all_dates, all_grades, color="#eb355e", marker="o",markersize=12, markerfacecolor="#781035", markeredgecolor="#781035", linewidth=6)
@@ -187,11 +188,12 @@ def draw_line_graph(all_grades, all_dates, category_title):
     plt.xlabel("Дата", fontsize=20)
     plt.ylabel("Результат теста", fontsize=20)
     plt.grid(True)
-    plt.savefig(f"{category_title}.png")
+    plt.savefig(f"{category_title}_{id_telegram}.png")
     plt.close()
 
 
-def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_size, colors, sub_category_numbers,  total_times):
+def draw_complex_pie_chart(id_telegram, group_names, group_size, subgroup_names2, subgroup_size, colors,
+                           sub_category_numbers,  total_times):
     # Make data: I have 3 groups and 7 subgroups
 
     subgroup_names = []
@@ -201,10 +203,8 @@ def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_si
     sub_colors = calculate_sub_colors(sub_category_numbers, colors)
     group_names = break_category_titles(group_names)
 
-
-    for i in range(len(group_names)): #добавить количество тестов
+    for i in range(len(group_names)):  # добавить количество тестов
         group_names[i] = group_names[i][0: ] + f": {group_size[i]}"
-
 
     for i in range(len(subgroup_names2)):
         subgroup_names2[i] = subgroup_names2[i][0: ] + f": {subgroup_size[i]}"
@@ -220,7 +220,6 @@ def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_si
     mypie2, _ = ax.pie(subgroup_size, radius=1.3 - 0.3, labels=subgroup_names, labeldistance=0.7, colors=sub_colors)
     plt.setp(mypie2, width=0.45)
 
-
     plt.legend(loc=(0.75, 0.8))
     handles, labels = ax.get_legend_handles_labels()
     plt.subplots_adjust(left=-0.10)
@@ -228,13 +227,12 @@ def draw_complex_pie_chart(group_names, group_size, subgroup_names2, subgroup_si
 
     fig = plt.gcf()
     fig.set_size_inches(17, 9)
-
-    #plt.show()
-    plt.savefig(f"{COMPLEX_PIE_CHART}.png", dpi=150)
+    # plt.show()
+    plt.savefig(f"{COMPLEX_PIE_CHART}_{id_telegram}.png", dpi=150)
     plt.close()
 
 
-def break_category_titles(category_titles): #разбивает категорию на две строки, если она длиннее 4 слов
+def break_category_titles(category_titles):  # разбивает категорию на две строки, если она длиннее 4 слов
 
     for i in range(len(category_titles)):
         counter = 0
@@ -250,7 +248,7 @@ def break_category_titles(category_titles): #разбивает категори
     return category_titles
 
 
-def calculate_sub_colors(group_size, colors): #создается масссив кортежей с цветами подкругов
+def calculate_sub_colors(group_size, colors):  # создается масссив кортежей с цветами подкругов
     sub_colors = []
 
     for i in range(len(colors)):

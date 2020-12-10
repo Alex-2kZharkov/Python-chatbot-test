@@ -23,6 +23,7 @@ global_reply_keyboard = None
 total_grade = None
 grade_information = None
 
+
 def reinit_used_variables():
     global g_id, user_answers, questions, gifs, current_question, global_reply_keyboard, total_grade, grade_information
     g_id = None
@@ -151,11 +152,11 @@ async def process_answer(msg: types.Message):
             subcategories = get_subcategories(g_id)
             category_title = get_category_title(g_id)
 
-
-            draw_pie_chart(grade_information['grade_limit'] , total_grade, subcategories["titles"], subcategories["grades"], category_title)
+            draw_pie_chart(int(msg["from"]["id"]), grade_information['grade_limit'] , total_grade,
+                           subcategories["titles"], subcategories["grades"], category_title)
             obj = get_all_result_by_category(int(msg["from"]["id"]), g_id)
 
-            draw_line_graph(obj["results"], obj["dates"], category_title)
+            draw_line_graph(int(msg["from"]["id"]), obj["results"], obj["dates"], category_title)
 
             await msg.answer("Ваши ответы находятся в роцессе обработки. Пожалуйста, ожидайте.")
 
@@ -168,7 +169,7 @@ async def process_answer(msg: types.Message):
             await msg.answer(string, reply_markup=start_again_button)
             await msg.answer_sticker(grade_information["gif"], "")
 
-            with open(f'{SIMPLE_PIE_CHART}.png', 'rb') as photo:
+            with open(f'{SIMPLE_PIE_CHART}_{int(msg["from"]["id"])}.png', 'rb') as photo:
                 await msg.answer_photo(photo, caption="Графическая интерпретация результатов текущего теста")
 
             res_string = "Графическая интерпретация всех результатов выбранного теста"
@@ -176,10 +177,10 @@ async def process_answer(msg: types.Message):
             if len(obj["results"]) < 2:
                 res_string += "(в данный момент тест пройден один раз, поэтому на графике показана только начальная точка)"
 
-            with open(f'{category_title}.png', 'rb') as photo:
+            with open(f'{category_title}_{int(msg["from"]["id"])}.png', 'rb') as photo:
                 await msg.answer_photo(photo, caption=res_string)
 
-            with open(f'{COMPLEX_PIE_CHART}.png', 'rb') as photo:
+            with open(f'{COMPLEX_PIE_CHART}_{int(msg["from"]["id"])}.png', 'rb') as photo:
                 await msg.answer_photo(photo, caption="Графическая интерпретация общего количества тестов")
 
             # формирование и отпрвка .pdf файла
@@ -187,20 +188,18 @@ async def process_answer(msg: types.Message):
             with open(file_name, 'rb') as doc:
                 await msg.answer_document(document=doc, caption="Более подробные результаты представлены в данном файле")
 
-
-
     else:
         await msg.answer("Я Вас не понимаю🙄")
 
 
 def get_data_for_complex_chart(id_telegram):
     mycursor = mydb.cursor()
-    mycursor.execute(f"select categories.category, grades_scope.grade_title, COUNT(grades_scope.grade_title) as count, categories.rgb from users "
-        f"INNER JOIN categories_n_grades ON users.user_cat_grades_id = categories_n_grades.id "
-        f"INNER JOIN categories ON categories_n_grades.categories_grades_id = categories.id "
-        f"INNER JOIN grades_scope ON categories_n_grades.grades_id = grades_scope.id "
-        f"where users.idTelegram = '706466022' "
-        f"GROUP BY categories.category, grades_scope.grade_title, categories.rgb  ORDER BY categories.category;")
+    mycursor.execute("select categories.category, grades_scope.grade_title, COUNT(grades_scope.grade_title) as count, categories.rgb from users "
+                     "INNER JOIN categories_n_grades ON users.user_cat_grades_id = categories_n_grades.id "
+                     "INNER JOIN categories ON categories_n_grades.categories_grades_id = categories.id "
+                     "INNER JOIN grades_scope ON categories_n_grades.grades_id = grades_scope.id "
+                     f"where users.idTelegram = {id_telegram} "
+                     "GROUP BY categories.category, grades_scope.grade_title, categories.rgb  ORDER BY categories.category;")
 
     myresult = mycursor.fetchall()
     total_times = 0
@@ -212,7 +211,7 @@ def get_data_for_complex_chart(id_telegram):
     grades = []
     colors = []
 
-    for row in myresult: #разделяет данные
+    for row in myresult:  # разделяет данные
         category_titles_obj.append(row[0])
         grade_titles.append(row[1])
         grades.append(row[2])
@@ -229,7 +228,7 @@ def get_data_for_complex_chart(id_telegram):
                 count +=1
         sub_category_numbers.append(count)
 
-    for property in category_titles_obj: #считает количество прохождений для каждой категории
+    for property in category_titles_obj:  # считает количество прохождений для каждой категории
         for row in myresult:
             if property == row[0]:
                 if category_titles_obj[property] is None:
@@ -237,12 +236,12 @@ def get_data_for_complex_chart(id_telegram):
                 else:
                     category_titles_obj[property] += row[2]
 
-    for property in category_titles_obj: #разделили на массив категорий и массив количества каждой из них
+    for property in category_titles_obj:  # разделили на массив категорий и массив количества каждой из них
         category_titles_array.append(property)
         category_titles_counts.append(category_titles_obj[property])
 
-    colors = recalculate_colors(colors) #пересчитывает цифры rgb по пропорции и получает массив кортежей-tuple
-    draw_complex_pie_chart(category_titles_array, category_titles_counts, grade_titles, grades, colors, sub_category_numbers, total_times)
+    colors = recalculate_colors(colors)  # пересчитывает цифры rgb по пропорции и получает массив кортежей-tuple
+    draw_complex_pie_chart(id_telegram, category_titles_array, category_titles_counts, grade_titles, grades, colors, sub_category_numbers, total_times)
 
 
 def recalculate_colors(colors):
@@ -267,12 +266,13 @@ def get_questions(category_id: int):
 
     for x in myresult:
         x = ''.join(x)
-        gif_start = x.find("http") # в одной строке и вопрос и адрес, поэтому ищу начало адреса картинки
-        gif_address = x[gif_start:] # срез адреса
-        x = x[:gif_start] # срез от начала вопроса до адреса картинки
+        gif_start = x.find("http")  # в одной строке и вопрос и адрес, поэтому ищу начало адреса картинки
+        gif_address = x[gif_start:]  # срез адреса
+        x = x[:gif_start]  # срез от начала вопроса до адреса картинки
 
         questions.append(x)
         gifs.append(gif_address)
+
 
 def get_category_title(id):
     mycursor = mydb.cursor()
