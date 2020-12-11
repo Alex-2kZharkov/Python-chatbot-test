@@ -23,7 +23,7 @@ I developed this application in collaboration with TLMS04. The app is a telegram
   best to think through architecture and write clean maintainable code
 - Bot has a gif for every question and every recommendation so the process of passing the test became very funny. Our purpose was to make it fun, but at the same time user will get realistic results
 - It creates wonderful charts, actually I adore them
-- App can really help people to track their emotional level and it's dynamic
+- App can really help people to track their emotional level and dynamic of that level
 
 ### What could be better?🤭
 - All information about tests, questions, etc has to be in DB. Therefore, there has to be
